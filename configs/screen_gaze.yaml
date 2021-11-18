@@ -1,0 +1,30 @@
+mode: MPIIGaze
+device: cpu
+model:
+  name: resnet_preact
+gaze_estimator:
+  checkpoint: data/models/mpiigaze/resnet_preact/model.pth
+  camera_params: data/calib/sample_params.yaml
+  normalized_camera_params: data/calib/normalized_camera_params_eye.yaml
+  normalized_camera_distance: 0.6
+demo:
+  use_camera: True
+  display_on_screen: True
+  wait_time: 1
+  video_path: ''
+  output_dir: ''
+  output_file_extension: mp4
+  head_pose_axis_length: 0.05
+  gaze_visualization_length: 0.05
+  show_bbox: True
+  show_head_pose: True
+  show_landmarks: True
+  show_normalized_image: False
+  show_template_model: False
+screen_gaze:
+  screen_id: 0
+  window_name: ScreenGaze
+  dot_radius: 100
+  fade_counter: 100
+  blanking_period: 20
+  save_file_name: 'g2s.pth'

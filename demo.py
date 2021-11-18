@@ -73,6 +73,41 @@ class Demo:
         self.cap.release()
         if self.writer:
             self.writer.release()
+    def run(self) -> None:
+        while True:
+            if self.config.demo.display_on_screen:
+                self._wait_key()
+                if self.stop:
+                    break
+
+            ok, frame = self.cap.read()
+            if not ok:
+                break
+
+            undistorted = cv2.undistort(
+                frame, self.gaze_estimator.camera.camera_matrix,
+                self.gaze_estimator.camera.dist_coefficients)
+
+            self.visualizer.set_image(frame.copy())
+            faces = self.gaze_estimator.detect_faces(undistorted)
+            for face in faces:
+                self.gaze_estimator.estimate_gaze(undistorted, face)
+                self._draw_face_bbox(face)
+                self._draw_head_pose(face)
+                self._draw_landmarks(face)
+                self._draw_face_template_model(face)
+                self._draw_gaze_vector(face)
+                self._display_normalized_image(face)
+
+            if self.config.demo.use_camera:
+                self.visualizer.image = self.visualizer.image[:, ::-1]
+            if self.writer:
+                self.writer.write(self.visualizer.image)
+            if self.config.demo.display_on_screen:
+                cv2.imshow('frame', self.visualizer.image)
+        self.cap.release()
+        if self.writer:
+            self.writer.release()
 
     def _create_capture(self) -> cv2.VideoCapture:
         if self.config.demo.use_camera:

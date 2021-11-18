@@ -120,6 +120,14 @@ config.cudnn = ConfigNode()
 config.cudnn.benchmark = True
 config.cudnn.deterministic = False
 
+# ScreenGaze
+config.screen_gaze = ConfigNode()
+config.screen_gaze.screen_id = 1
+config.screen_gaze.window_name = 'ScreenGaze'
+config.screen_gaze.dot_radius = 100
+config.screen_gaze.fade_counter = 100
+config.screen_gaze.blanking_period = 10  # How many initial frames to ignore when target has moved to new position
+config.screen_gaze.save_file_name = None
 
 def get_default_config():
     return config.clone()
