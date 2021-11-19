@@ -19,14 +19,14 @@ class Gaze2Screen(nn.Module):
         leye:yaw
         """
         n_features = 8
-        n_internal_features = 4
-        n_internal_layers = 2
+        n_internal_features = 8
+        n_internal_layers = 3
         super().__init__()
         self.input_layer = nn.Linear(n_features, n_internal_features)
         self.output_layer = nn.Linear(n_internal_features, 2)
-        self.internal_layers = []
+        self.internal_layers = nn.Sequential()
         for layer in range(n_internal_layers):
-            self.internal_layers.append(nn.Linear(n_internal_features, n_internal_features))
+            self.internal_layers.add_module(f'fc{layer}', nn.Linear(n_internal_features, n_internal_features))
 
         if filename is not None:
             try:
@@ -38,8 +38,7 @@ class Gaze2Screen(nn.Module):
 
     def forward(self, x):
         x = self.input_layer(x)
-        for layer in self.internal_layers:
-            x = layer(x)
+        x = self.internal_layers(x)
         x = self.output_layer(x)
         return x
 

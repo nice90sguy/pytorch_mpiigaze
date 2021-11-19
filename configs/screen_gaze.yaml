@@ -1,5 +1,5 @@
 mode: MPIIGaze
-device: cpu
+device: cuda
 model:
   name: resnet_preact
 gaze_estimator:
@@ -25,6 +25,6 @@ screen_gaze:
   screen_id: 0
   window_name: ScreenGaze
   dot_radius: 100
-  fade_counter: 100
-  blanking_period: 20
+  fade_counter: 20
+  blanking_period: 5
   save_file_name: 'g2s.pth'

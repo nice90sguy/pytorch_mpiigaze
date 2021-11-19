@@ -31,7 +31,7 @@ class ScreenGaze:
         self.gaze2screen = Gaze2Screen(self.config.screen_gaze.save_file_name)
         self.loss_func = torch.nn.MSELoss(reduction='sum')
         self.loss = 0
-        self.optimizer = torch.optim.SGD(self.gaze2screen.parameters(), lr=1e-3, weight_decay=.1, momentum=.01)
+        self.optimizer = torch.optim.SGD(self.gaze2screen.parameters(), lr=1e-3, dampening=.5, momentum=.5)
         self.cap = self._create_capture()
         self.minibatch_size = 100
 
@@ -122,6 +122,7 @@ class ScreenGaze:
 
     def train(self) -> None:
         ok = True
+        iters = 0
         while ok:
             batch_start_time = time.perf_counter()
             for i in range(self.minibatch_size):
@@ -133,6 +134,7 @@ class ScreenGaze:
                 elif key == ord('t'):
                     self.training = not self.training
                 elif key == ord(' '):
+                    self.training = not self.training
                     self.fade_counter = 0
 
                 if ok:
@@ -155,13 +157,17 @@ class ScreenGaze:
                         is_in_blanking_period = self.config.screen_gaze.fade_counter - self.fade_counter < self.config.screen_gaze.blanking_period
                         if not is_in_blanking_period:
                             target = torch.tensor(self.target, dtype=torch.float32)
-                            self.loss = self.loss_func(guess, target)
+                            # self.loss = self.loss_func(guess, target)
+                            self.loss = torch.abs(guess[0] - target[0]) + 5.0 * torch.abs(guess[1] - target[1])
                             self.optimizer.zero_grad()
                             self.loss.backward()
                             self.optimizer.step()
+                            iters = iters + 1
                     break  # Only want one face
             batch_end_time = time.perf_counter()
-            self.gaze2screen.save(self.config.screen_gaze.save_file_name)
+            if iters >= self.minibatch_size:
+                iters = 0
+                self.gaze2screen.save(self.config.screen_gaze.save_file_name)
             logger.info(f'Loss: {self.loss * 100: .2f}\tfps: {self.minibatch_size / (batch_end_time - batch_start_time) : .2f} ')
 
         self.cap.release()
